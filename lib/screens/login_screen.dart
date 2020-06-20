@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import './register_screen.dart';
+import '../providers/auth.dart';
+import './home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -9,8 +12,31 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
+  Map<String, String> _data = {};
 
-  Future<void> _submit() async {}
+  Future<void> _submit() async {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+    print('>>>>>');
+    try {
+      await Provider.of<Auth>(context, listen: false).login(_data);
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(
+      //     builder: (ctx) => HomeScreen(),
+      //   ),
+      // );
+    } catch (e) {
+      await showDialog(
+        context: context,
+        child: AlertDialog(
+          title: Text('Error'),
+          content: Text('Login Failed.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +74,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Username',
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == '') {
+                          return 'This field is empty.';
+                        }
+                      },
+                      onSaved: (value) {
+                        _data['email'] = value;
+                      },
                     ),
                   ),
                   SizedBox(
@@ -61,6 +95,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         labelText: 'Password',
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == '') {
+                          return 'This field is empty.';
+                        }
+                      },
+                      onSaved: (value) {
+                        _data['password'] = value;
+                      },
                     ),
                   ),
                   SizedBox(

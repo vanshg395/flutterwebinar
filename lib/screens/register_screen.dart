@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import './login_screen.dart';
+import '../providers/auth.dart';
 import './login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -9,8 +12,31 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey();
+  Map<String, String> _data = {};
 
-  Future<void> _submit() async {}
+  Future<void> _submit() async {
+    if (!_formKey.currentState.validate()) {
+      return;
+    }
+    _formKey.currentState.save();
+    print(_data);
+    try {
+      await Provider.of<Auth>(context, listen: false).register(_data);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (ctx) => LoginScreen(),
+        ),
+      );
+    } catch (e) {
+      await showDialog(
+        context: context,
+        child: AlertDialog(
+          title: Text('Error'),
+          content: Text('Signup Could not be completed.'),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +71,37 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: 300,
                     child: TextFormField(
                       decoration: InputDecoration(
+                        labelText: 'Name',
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == '') {
+                          return 'This field is required.';
+                        }
+                      },
+                      onSaved: (value) {
+                        _data['name'] = value;
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Container(
+                    width: 300,
+                    child: TextFormField(
+                      decoration: InputDecoration(
                         labelText: 'Username',
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == '') {
+                          return 'This field is required.';
+                        }
+                      },
+                      onSaved: (value) {
+                        _data['email'] = value;
+                      },
                     ),
                   ),
                   SizedBox(
@@ -61,6 +115,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         labelText: 'Password',
                         border: OutlineInputBorder(),
                       ),
+                      validator: (value) {
+                        if (value == '') {
+                          return 'This field is required.';
+                        }
+                      },
+                      onSaved: (value) {
+                        _data['password'] = value;
+                      },
                     ),
                   ),
                   SizedBox(
